@@ -198,7 +198,7 @@ class BookKeeperTest {
         ProductData product2 = new ProductDataBuilder().productId(Id.generate())
                 .price(Money.ZERO)
                 .name(SAMPLE_PRODUCT_DATA_NAME)
-                .productType(ProductType.STANDARD)
+                .productType(ProductType.DRUG)
                 .snapshotDate(null)
                 .build();
 
@@ -209,7 +209,7 @@ class BookKeeperTest {
         ProductData product3 = new ProductDataBuilder().productId(Id.generate())
                 .price(Money.ZERO)
                 .name(SAMPLE_PRODUCT_DATA_NAME)
-                .productType(ProductType.STANDARD)
+                .productType(ProductType.FOOD)
                 .snapshotDate(null)
                 .build();
 
@@ -220,12 +220,26 @@ class BookKeeperTest {
         when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class))).thenReturn(SAMPLE_TAX);
         when(factory.create(SAMPLE_CLIENT_DATA)).thenReturn(sampleInvoice);
 
+        ArgumentCaptor<ProductType> productTypeCaptor = ArgumentCaptor.forClass(ProductType.class);
+        ArgumentCaptor<Money> moneyCaptor = ArgumentCaptor.forClass(Money.class);
+
         int expected = 3;
 
-        Invoice invoice = keeper.issuance(request, taxPolicy);
+        keeper.issuance(request, taxPolicy);
 
-        assertEquals(expected, invoice.getItems().size());
-        verify(taxPolicy, times(3)).calculateTax(any(ProductType.class), any(Money.class));
+        verify(taxPolicy, times(expected)).calculateTax(productTypeCaptor.capture(), moneyCaptor.capture());
+
+        List<ProductType> capturedProductTypes = productTypeCaptor.getAllValues();
+        List<Money> capturedMoney = moneyCaptor.getAllValues();
+
+        assertEquals(product1.getType(), capturedProductTypes.get(0));
+        assertEquals(totalCost1, capturedMoney.get(0));
+
+        assertEquals(product2.getType(), capturedProductTypes.get(1));
+        assertEquals(totalCost2, capturedMoney.get(1));
+
+        assertEquals(product3.getType(), capturedProductTypes.get(2));
+        assertEquals(totalCost3, capturedMoney.get(2));
     }
 
 }

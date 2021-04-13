@@ -118,6 +118,7 @@ class BookKeeperTest {
         assertEquals(expected, invoice.getItems().size());
     }
 
+    @Test
     public void behaviorTest_invokeCalculateTax_RequestContainsTwoItemsWithCorrespondingParameters() {
         InvoiceRequest request = new InvoiceRequest(SAMPLE_CLIENT_DATA);
         Invoice sampleInvoice = new Invoice(SAMPLE_INVOICE_ID, SAMPLE_CLIENT_DATA);

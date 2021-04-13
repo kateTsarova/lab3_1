@@ -167,4 +167,29 @@ class BookKeeperTest {
         assertEquals(totalCost2, capturedMoney.get(1));
     }
 
+    @Test
+    public void behaviorTest_noInteractions_noItemsInInvoiceRequest() {
+        InvoiceRequest request = new InvoiceRequest(SAMPLE_CLIENT_DATA);
+
+        Invoice sampleInvoice = new Invoice(SAMPLE_INVOICE_ID, SAMPLE_CLIENT_DATA);
+        when(factory.create(SAMPLE_CLIENT_DATA)).thenReturn(sampleInvoice);
+
+        keeper.issuance(request, taxPolicy);
+
+        verifyNoInteractions(taxPolicy);
+    }
+
+    @Test
+    public void behaviorTest_invokeCreateMethodOnce() {
+        InvoiceRequest request = new InvoiceRequest(SAMPLE_CLIENT_DATA);
+
+        Invoice sampleInvoice = new Invoice(SAMPLE_INVOICE_ID, SAMPLE_CLIENT_DATA);
+        when(factory.create(SAMPLE_CLIENT_DATA)).thenReturn(sampleInvoice);
+
+        keeper.issuance(request, taxPolicy);
+
+        int expected = 1;
+        verify(factory, times(expected)).create(any(ClientData.class));
+    }
+
 }

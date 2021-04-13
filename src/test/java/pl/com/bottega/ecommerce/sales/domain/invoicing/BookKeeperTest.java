@@ -180,16 +180,52 @@ class BookKeeperTest {
     }
 
     @Test
-    public void behaviorTest_invokeCreateMethodOnce() {
+    public void behaviorTest_invokeCalculateTax_RequestContainsThreeItemsWithCorrespondingParameters() {
         InvoiceRequest request = new InvoiceRequest(SAMPLE_CLIENT_DATA);
-
         Invoice sampleInvoice = new Invoice(SAMPLE_INVOICE_ID, SAMPLE_CLIENT_DATA);
+
+        ProductData product1 = new ProductDataBuilder().productId(Id.generate())
+                .price(Money.ZERO)
+                .name(SAMPLE_PRODUCT_DATA_NAME)
+                .productType(ProductType.STANDARD)
+                .snapshotDate(null)
+                .build();
+
+        Money totalCost1 = new Money(10, Money.DEFAULT_CURRENCY);
+        RequestItem requestItem1 = new RequestItem(product1, 1, totalCost1);
+        request.add(requestItem1);
+
+        ProductData product2 = new ProductDataBuilder().productId(Id.generate())
+                .price(Money.ZERO)
+                .name(SAMPLE_PRODUCT_DATA_NAME)
+                .productType(ProductType.STANDARD)
+                .snapshotDate(null)
+                .build();
+
+        Money totalCost2 = new Money(2, Money.DEFAULT_CURRENCY);
+        RequestItem requestItem2 = new RequestItem(product2, 2, totalCost2);
+        request.add(requestItem2);
+
+        ProductData product3 = new ProductDataBuilder().productId(Id.generate())
+                .price(Money.ZERO)
+                .name(SAMPLE_PRODUCT_DATA_NAME)
+                .productType(ProductType.STANDARD)
+                .snapshotDate(null)
+                .build();
+
+        Money totalCost3 = new Money(3, Money.DEFAULT_CURRENCY);
+        RequestItem requestItem3 = new RequestItem(product3, 3, totalCost3);
+        request.add(requestItem3);
+
+        when(taxPolicy.calculateTax(any(ProductType.class), any(Money.class))).thenReturn(SAMPLE_TAX);
         when(factory.create(SAMPLE_CLIENT_DATA)).thenReturn(sampleInvoice);
 
-        keeper.issuance(request, taxPolicy);
+        int expected = 3;
 
-        int expected = 1;
-        verify(factory, times(expected)).create(any(ClientData.class));
+        Invoice invoice = keeper.issuance(request, taxPolicy);
+
+        assertEquals(expected, invoice.getItems().size());
+        verify(taxPolicy, times(3)).calculateTax(any(ProductType.class), any(Money.class));
     }
 
 }
